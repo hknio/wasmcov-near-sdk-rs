@@ -264,7 +264,11 @@ fn wasmcov_tokens() -> TokenStream2 {
                 // Note that this function is not thread-safe! Use a lock if needed.
                 minicov::capture_coverage(&mut coverage).unwrap();
             };
-            ::near_sdk::env::log_str(std::str::from_utf8(&coverage).unwrap());
+            let base64_string = near_sdk::base64::encode(coverage);
+            let serialized = near_sdk::serde_json::to_string(&base64_string).expect("Failed to serialize");
+            let serialized_str: &str = &serialized;
+
+            ::near_sdk::env::log_str(serialized_str);
         }
     }
 
