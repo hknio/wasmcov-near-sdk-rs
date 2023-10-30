@@ -264,7 +264,7 @@ fn wasmcov_tokens() -> TokenStream2 {
                 // Note that this function is not thread-safe! Use a lock if needed.
                 minicov::capture_coverage(&mut coverage).unwrap();
             };
-            ::near_sdk::env::log_str(format!("COVERAGE:{}", ::near_sdk::serde_json::to_string(coverage).unwrap()));
+            ::near_sdk::env::log_str(str::from_utf8(&coverage));
         }
     }
 
