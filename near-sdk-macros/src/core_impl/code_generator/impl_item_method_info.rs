@@ -116,10 +116,13 @@ impl ImplItemMethodInfo {
                 };
                 contract_ser = TokenStream2::new();
             }
+
+            let wasmcov = wasmcov_tokens();
             match returns {
                 ReturnType::Default => quote! {
                     #contract_deser
                     #method_invocation;
+                    #wasmcov
                     #contract_ser
                 },
                 ReturnType::Type(_, return_type)
@@ -140,6 +143,7 @@ impl ImplItemMethodInfo {
                             Ok(result) => {
                                 #value_ser
                                 near_sdk::env::value_return(&result);
+                                #wasmcov
                                 #contract_ser
                             }
                             Err(err) => near_sdk::FunctionError::panic(&err)
@@ -178,6 +182,7 @@ impl ImplItemMethodInfo {
                         let result = #method_invocation;
                         #value_ser
                         near_sdk::env::value_return(&result);
+                        #wasmcov
                         #contract_ser
                     }
                 }
@@ -249,4 +254,19 @@ fn init_method_wrapper(
             near_sdk::env::state_write(&contract);
         }),
     }
+}
+
+fn wasmcov_tokens() -> TokenStream2 {
+    fn wasmcov() -> TokenStream2 {
+        quote! {
+            let mut coverage = vec![];
+            unsafe {
+                // Note that this function is not thread-safe! Use a lock if needed.
+                minicov::capture_coverage(&mut coverage).unwrap();
+            };
+            ::near_sdk::env::log_str();
+        }
+    }
+
+    wasmcov()
 }
