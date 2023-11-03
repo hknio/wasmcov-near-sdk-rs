@@ -265,10 +265,8 @@ fn wasmcov_tokens() -> TokenStream2 {
                 minicov::capture_coverage(&mut coverage).unwrap();
             };
             let base64_string = near_sdk::base64::encode(coverage);
-            let serialized = near_sdk::serde_json::to_string(&base64_string).expect("Failed to serialize");
-            let serialized_str: &str = &serialized;
 
-            ::near_sdk::env::log_str(serialized_str);
+            ::near_sdk::env::log_str(&base64_string);
         }
     }
 
